@@ -1,0 +1,59 @@
+{% extends "_base.html" %}
+{% block page_class %}admin{% endblock %}
+{% block content %}
+<div class="card">
+    <h1>📊 Admin — Cena vicino a casa della nonna</h1>
+    <p class="muted">Totale RSVP: <strong>{{ rsvps|length }}</strong> · <a style="color: var(--accent-2);" href="{{ url_for('admin_export') }}?key={{ admin_key }}">export CSV</a></p>
+
+    <h2 style="margin-top: 24px;">Disponibilità per data</h2>
+    {% set maxcount = (tally|map(attribute=2)|list|max) or 1 %}
+    <table>
+        <tr><th>Data</th><th>Persone</th><th>Chi</th></tr>
+        {% for label, iso, count in tally %}
+        <tr>
+            <td>{{ label }} <span class="muted">({{ iso }})</span></td>
+            <td>
+                <span class="tally-bar" style="width: {{ (count * 220 / maxcount)|int }}px;"></span>
+                <strong>{{ count }}</strong>
+            </td>
+            <td>
+                {% for r in rsvps %}
+                    {% if iso in r.date_isos %}<span class="pill">{{ r.name }}</span>{% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2 style="margin-top: 32px;">RSVP ({{ rsvps|length }})</h2>
+    <table>
+        <tr><th>#</th><th>Nome</th><th>Email</th><th>Date disponibili</th><th>Quando</th></tr>
+        {% for r in rsvps %}
+        <tr>
+            <td>{{ r.id }}</td>
+            <td><strong>{{ r.name }}</strong></td>
+            <td>{{ r.email }}</td>
+            <td>{% for d in r.dates %}<span class="pill">{{ d }}</span>{% endfor %}</td>
+            <td class="muted">{{ r.when }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="muted">Nessuna prenotazione ancora.</td></tr>
+        {% endfor %}
+    </table>
+
+    <h2 style="margin-top: 32px;">Tentativi quiz (ultimi 200)</h2>
+    <table>
+        <tr><th>Nome</th><th>Risposta</th><th>Esito</th><th>Quando</th></tr>
+        {% for a in attempts %}
+        <tr>
+            <td>{{ a.name }}</td>
+            <td>{{ a.answer }}</td>
+            <td>{% if a.correct %}<span class="pill pill-ok">✓ giusto</span>{% else %}<span class="pill pill-err">✗ sbagliato</span>{% endif %}</td>
+            <td class="muted">{{ a.when }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="muted">Nessun tentativo ancora.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: cena-nonna
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT app:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.4
+      - key: CENA_ADMIN_KEY
+        value: CENA-6FDB41AC
+      - key: CENA_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cena-nonna-db
+          property: connectionString
+
+databases:
+  - name: cena-nonna-db
+    plan: free
+    region: frankfurt
+    postgresMajorVersion: "16"

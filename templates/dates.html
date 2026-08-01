@@ -1,0 +1,29 @@
+{% extends "_base.html" %}
+{% block content %}
+<div class="card">
+    <h1>📅 Quando ci saresti?</h1>
+    <p class="intro">
+        Seleziona tutte le date in cui saresti disponibile — dal <strong>10 al 20 agosto 2026</strong>.
+        Puoi scegliere anche più giorni: cerchiamo l'overlap migliore.
+    </p>
+    <form action="{{ url_for('dates') }}" method="post">
+        <div class="dates-list">
+            {% for iso, label in date_options %}
+            <label class="choice {% if iso in selected %}selected{% endif %}">
+                <input type="checkbox" name="dates" value="{{ iso }}" {% if iso in selected %}checked{% endif %}>
+                <span>{{ label }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
+        <button type="submit">Continua →</button>
+    </form>
+</div>
+<script>
+document.querySelectorAll('.dates-list .choice input').forEach(el => {
+    const toggle = () => el.closest('.choice').classList.toggle('selected', el.checked);
+    el.addEventListener('change', toggle);
+    toggle();
+});
+</script>
+{% endblock %}

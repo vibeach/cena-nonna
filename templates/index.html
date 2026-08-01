@@ -1,0 +1,16 @@
+{% extends "_base.html" %}
+{% block content %}
+<div class="card">
+    <h1>🍷 Cena vicino a casa della nonna di Ale</h1>
+    <p class="intro">
+        Una serata tra amici, con vista sulle colline. Rispondi a due domande veloci
+        per prenotarti — e a tempo debito riceverai il luogo segreto.
+    </p>
+    <form action="{{ url_for('quiz') }}" method="post">
+        <label for="name">Come ti chiami?</label>
+        <input type="text" id="name" name="name" placeholder="Nome e cognome" required autofocus maxlength="80">
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
+        <button type="submit">Iniziamo →</button>
+    </form>
+</div>
+{% endblock %}
