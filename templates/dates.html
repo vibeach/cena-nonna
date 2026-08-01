@@ -1,10 +1,10 @@
 {% extends "_base.html" %}
 {% block content %}
 <div class="card">
-    <h1>📅 Quando ci saresti?</h1>
+    <h1>Quando ci saresti? ☀️</h1>
     <p class="intro">
-        Seleziona tutte le date in cui saresti disponibile — dal <strong>10 al 20 agosto 2026</strong>.
-        Puoi scegliere anche più giorni: cerchiamo l'overlap migliore.
+        Seleziona tutte le sere in cui potresti esserci — dal <strong>10 al 20 agosto 2026</strong>.
+        Più giorni scegli, più è facile trovare la data che va bene a tutti.
     </p>
     <form action="{{ url_for('dates') }}" method="post">
         <div class="dates-list">
@@ -16,7 +16,7 @@
             {% endfor %}
         </div>
         {% if error %}<div class="error">{{ error }}</div>{% endif %}
-        <button type="submit">Continua →</button>
+        <button type="submit">Continua 🌊</button>
     </form>
 </div>
 <script>

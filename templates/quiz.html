@@ -1,8 +1,8 @@
 {% extends "_base.html" %}
 {% block content %}
 <div class="card">
-    <h1>🔐 Verifica di essere amico di Ale</h1>
-    <p class="intro">Ciao <strong>{{ name }}</strong>! Una sola domanda per assicurarci che tu sia dei nostri.</p>
+    <h1>Sei dei nostri? 🏖️</h1>
+    <p class="intro">Ciao <strong>{{ name }}</strong>! Piccola verifica prima di svelarti tutto.</p>
     <form action="{{ url_for('verify') }}" method="post">
         <h2>Qual è il soprannome di Ale?</h2>
         <div class="choices">
@@ -14,7 +14,7 @@
             {% endfor %}
         </div>
         {% if error %}<div class="error">{{ error }}</div>{% endif %}
-        <button type="submit">Verifica →</button>
+        <button type="submit">Verifica 🌴</button>
     </form>
 </div>
 <script>

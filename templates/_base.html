@@ -5,12 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>{% block title %}Cena vicino a casa della nonna di Ale{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ URL_PREFIX }}/static/style.css">
 </head>
 <body>
+    <div class="sky"></div>
+    <div class="waves">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,60 C300,120 600,0 900,60 C1050,90 1150,40 1200,60 L1200,120 L0,120 Z" fill="#7fc8d6" opacity="0.55"/>
+            <path d="M0,80 C300,20 600,120 900,60 C1050,30 1150,90 1200,70 L1200,120 L0,120 Z" fill="#4aa3b8" opacity="0.75"/>
+            <path d="M0,100 C300,70 600,110 900,90 C1050,80 1150,110 1200,100 L1200,120 L0,120 Z" fill="#2b6e82"/>
+        </svg>
+    </div>
     <div class="page {% block page_class %}{% endblock %}">
         {% block content %}{% endblock %}
-        <div class="footer">🍝 organizzata da Ale</div>
+        <div class="footer">🌅 organizzata da Ale · dinner by the hills</div>
     </div>
 </body>
 </html>
