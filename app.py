@@ -268,17 +268,6 @@ def healthz():
     return {"ok": True}
 
 
-@app.route(prefixed("/admin/wipe"), methods=["POST"])
-def admin_wipe():
-    key = request.args.get("key", "")
-    if key != ADMIN_KEY:
-        abort(403)
-    with engine.begin() as c:
-        c.execute(text("DELETE FROM rsvps"))
-        c.execute(text("DELETE FROM attempts"))
-    return {"ok": True, "wiped": True}
-
-
 init_db()
 
 
