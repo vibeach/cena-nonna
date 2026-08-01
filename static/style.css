@@ -94,21 +94,11 @@ html { background: linear-gradient(180deg, #ffe4b8 0%, #ffb59c 40%, #ff8a80 70%,
     background: rgba(255, 250, 240, 0.94);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.7);
     border-radius: 28px;
     padding: 34px 28px;
     box-shadow: var(--shadow);
     position: relative;
-    overflow: hidden;
-}
-
-.card::after {
-    content: '';
-    position: absolute;
-    top: -80px; right: -80px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(255, 213, 128, 0.6) 0%, transparent 70%);
-    pointer-events: none;
 }
 
 h1 {
