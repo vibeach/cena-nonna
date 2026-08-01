@@ -1,0 +1,29 @@
+{% extends "_base.html" %}
+{% block content %}
+<div class="card">
+    <h1>C'è Pappo? 🕵️</h1>
+    <p class="intro">
+        Ultima verifica prima di prenotare — <strong>{{ name }}</strong>, guarda bene:
+        in questa foto <strong>c'è Pappo</strong> o no?
+    </p>
+
+    <div class="pappo-meta">
+        <span class="pill">Foto {{ current }} / {{ total }}</span>
+        <span class="pill {% if errors > 0 %}pill-err{% endif %}">
+            Errori: {{ errors }} / {{ max_errors }}
+        </span>
+    </div>
+
+    <div class="pappo-frame">
+        <img src="{{ URL_PREFIX }}/static/pappo/img/{{ img }}" alt="C'è Pappo?" loading="lazy">
+    </div>
+
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+    <form action="{{ url_for('pappo') }}" method="post" class="pappo-buttons">
+        <input type="hidden" name="img" value="{{ img }}">
+        <button type="submit" name="answer" value="yes" class="btn-yes">✅ Sì, c'è</button>
+        <button type="submit" name="answer" value="no" class="btn-no">❌ No</button>
+    </form>
+</div>
+{% endblock %}

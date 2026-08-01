@@ -7,6 +7,7 @@
         sopra il mare. Rispondi a due domande veloci per prenotarti — la posizione
         segreta arriva a tempo debito.
     </p>
+    {% if fail %}<div class="error">Hai sbagliato troppe volte 😅 Rifacciamo dall'inizio.</div>{% endif %}
     <form action="{{ url_for('quiz') }}" method="post">
         <label for="name">Come ti chiami?</label>
         <input type="text" id="name" name="name" placeholder="Nome e cognome" required autofocus maxlength="80">

@@ -1,8 +1,11 @@
 import os
 import json
 import time
+import hashlib
+import random
+import shutil
 from datetime import datetime
-from flask import Flask, request, redirect, render_template, session, url_for, abort, Response
+from flask import Flask, request, redirect, render_template, session, url_for, abort, Response, send_from_directory
 from sqlalchemy import create_engine, text
 from sqlalchemy.pool import NullPool
 
@@ -26,6 +29,43 @@ IS_PG = DATABASE_URL.startswith("postgresql")
 CORRECT_ANSWER = "Flippi"
 NICKNAME_OPTIONS = ["Supermario", "Flippi", "Batman", "Bomber"]
 DATE_OPTIONS = [f"2026-08-{d:02d}" for d in range(10, 21)]
+
+PAPPO_ROUND_SIZE = 6
+PAPPO_MAX_ERRORS = 3
+PAPPO_DIR = os.path.join(APP_DIR, "static", "pappo")
+PAPPO_IMG_DIR = os.path.join(PAPPO_DIR, "img")
+PAPPO_MANIFEST = os.path.join(PAPPO_DIR, "manifest.json")
+
+
+def build_pappo_manifest():
+    """Copy static/pappo/{yes,no}/*.jpg to static/pappo/img/<hash>.jpg with a server-side
+    yes/no map. Idempotent: only rebuilds when source dirs change vs. existing manifest."""
+    src_yes = os.path.join(PAPPO_DIR, "yes")
+    src_no = os.path.join(PAPPO_DIR, "no")
+    if not (os.path.isdir(src_yes) and os.path.isdir(src_no)):
+        return {}
+    os.makedirs(PAPPO_IMG_DIR, exist_ok=True)
+    manifest = {}
+    for kind, src in (("yes", src_yes), ("no", src_no)):
+        for fn in sorted(os.listdir(src)):
+            if not fn.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+                continue
+            src_path = os.path.join(src, fn)
+            digest = hashlib.sha256(f"{kind}:{fn}".encode()).hexdigest()[:16]
+            ext = os.path.splitext(fn)[1].lower().replace(".jpeg", ".jpg")
+            out_name = f"{digest}{ext}"
+            out_path = os.path.join(PAPPO_IMG_DIR, out_name)
+            if not os.path.exists(out_path) or os.path.getmtime(out_path) < os.path.getmtime(src_path):
+                shutil.copy2(src_path, out_path)
+            manifest[out_name] = (kind == "yes")
+    with open(PAPPO_MANIFEST, "w") as f:
+        json.dump(manifest, f, indent=2)
+    return manifest
+
+
+PAPPO_MAP = build_pappo_manifest()
+PAPPO_YES = [k for k, v in PAPPO_MAP.items() if v]
+PAPPO_NO = [k for k, v in PAPPO_MAP.items() if not v]
 
 STATIC_URL = f"{URL_PREFIX}/static" if URL_PREFIX else "/static"
 
@@ -77,8 +117,9 @@ def prefixed(path):
 
 @app.route(prefixed("/") or "/")
 def home():
+    fail = request.args.get("fail") == "1"
     session.clear()
-    return render_template("index.html")
+    return render_template("index.html", fail=fail)
 
 
 @app.route(prefixed("/quiz"), methods=["GET", "POST"])
@@ -116,12 +157,81 @@ def verify():
             error="Risposta sbagliata. Riprova (o chiedi ad Ale).",
         )
     session["verified"] = True
-    return redirect(url_for("dates"))
+    return redirect(url_for("pappo"))
+
+
+def _new_pappo_round():
+    half = PAPPO_ROUND_SIZE // 2
+    yes_sample = random.sample(PAPPO_YES, min(half, len(PAPPO_YES)))
+    no_sample = random.sample(PAPPO_NO, min(PAPPO_ROUND_SIZE - len(yes_sample), len(PAPPO_NO)))
+    queue = yes_sample + no_sample
+    random.shuffle(queue)
+    return queue
+
+
+@app.route(prefixed("/pappo"), methods=["GET", "POST"])
+def pappo():
+    if not session.get("verified"):
+        return redirect(url_for("home"))
+    if session.get("pappo_passed"):
+        return redirect(url_for("dates"))
+    if not PAPPO_MAP:
+        session["pappo_passed"] = True
+        return redirect(url_for("dates"))
+
+    if "pappo_queue" not in session:
+        session["pappo_queue"] = _new_pappo_round()
+        session["pappo_idx"] = 0
+        session["pappo_errors"] = 0
+
+    error_msg = None
+
+    if request.method == "POST":
+        answer = request.form.get("answer")
+        current_img = request.form.get("img")
+        if answer not in ("yes", "no") or current_img not in PAPPO_MAP:
+            return redirect(url_for("pappo"))
+        expected_yes = PAPPO_MAP[current_img]
+        got_yes = answer == "yes"
+        if got_yes == expected_yes:
+            session["pappo_idx"] = session.get("pappo_idx", 0) + 1
+            if session["pappo_idx"] >= len(session["pappo_queue"]):
+                session["pappo_passed"] = True
+                session.pop("pappo_queue", None)
+                session.pop("pappo_idx", None)
+                session.pop("pappo_errors", None)
+                return redirect(url_for("dates"))
+            return redirect(url_for("pappo"))
+        else:
+            session["pappo_errors"] = session.get("pappo_errors", 0) + 1
+            if session["pappo_errors"] >= PAPPO_MAX_ERRORS:
+                session.clear()
+                return redirect(url_for("home") + "?fail=1")
+            remaining = PAPPO_MAX_ERRORS - session["pappo_errors"]
+            error_msg = f"Guarda meglio e riprova.. hai ancora {remaining} tentativ{'o' if remaining == 1 else 'i'}."
+
+    idx = session.get("pappo_idx", 0)
+    queue = session.get("pappo_queue", [])
+    if idx >= len(queue):
+        session["pappo_passed"] = True
+        return redirect(url_for("dates"))
+    current_img = queue[idx]
+
+    return render_template(
+        "pappo.html",
+        name=session.get("name"),
+        img=current_img,
+        current=idx + 1,
+        total=len(queue),
+        errors=session.get("pappo_errors", 0),
+        max_errors=PAPPO_MAX_ERRORS,
+        error=error_msg,
+    )
 
 
 @app.route(prefixed("/dates"), methods=["GET", "POST"])
 def dates():
-    if not session.get("verified"):
+    if not session.get("verified") or not session.get("pappo_passed"):
         return redirect(url_for("home"))
 
     if request.method == "POST":
