@@ -161,10 +161,7 @@ def verify():
 
 
 def _new_pappo_round():
-    half = PAPPO_ROUND_SIZE // 2
-    yes_sample = random.sample(PAPPO_YES, min(half, len(PAPPO_YES)))
-    no_sample = random.sample(PAPPO_NO, min(PAPPO_ROUND_SIZE - len(yes_sample), len(PAPPO_NO)))
-    queue = yes_sample + no_sample
+    queue = list(PAPPO_YES) + list(PAPPO_NO)
     random.shuffle(queue)
     return queue
 
