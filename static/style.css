@@ -24,9 +24,10 @@ html, body {
     color: var(--text);
     font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
     line-height: 1.55;
-    background: #fff3dc;
+    background: transparent;
     overflow-x: hidden;
 }
+html { background: linear-gradient(180deg, #ffe4b8 0%, #ffb59c 40%, #ff8a80 70%, #e8637a 100%); }
 
 /* animated sunset sky */
 .sky {
@@ -82,10 +83,11 @@ html, body {
 .waves svg { width: 100%; height: 100%; display: block; }
 
 .page {
-    max-width: 560px;
+    max-width: 520px;
     margin: 0 auto;
-    padding: 40px 20px 160px;
+    padding: 32px 16px 160px;
     position: relative;
+    width: 100%;
 }
 
 .card {
@@ -277,11 +279,10 @@ button:active { transform: translateY(0); }
 .footer {
     text-align: center;
     margin-top: 36px;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 13px;
+    color: #fff;
     font-family: 'Caveat', cursive;
-    font-size: 20px;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    font-size: 22px;
+    text-shadow: 0 2px 8px rgba(43, 110, 130, 0.5), 0 1px 2px rgba(0,0,0,0.25);
     position: relative;
     z-index: 1;
 }
